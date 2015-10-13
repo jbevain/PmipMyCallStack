@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<PackageManifest Version="2.0.0" xmlns="http://schemas.microsoft.com/developer/vsx-schema/2011" xmlns:d="http://schemas.microsoft.com/developer/vsx-schema-design/2011">
+  <Metadata>
+    <Identity Id="PmipMyCallStack.jbevain.15921810-5bc8-451e-acc0-e45161908103" Version="1.0" Language="en-US" Publisher="Jb Evain" />
+    <DisplayName>Pmip My Call Stack</DisplayName>
+    <Description xml:space="preserve">Visual Studio native debugger extension to help debug native applications using Mono.</Description>
+  </Metadata>
+  <Installation>
+    <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[14.0]" />
+  </Installation>
+  <Dependencies>
+    <Dependency Id="Microsoft.Framework.NDP" DisplayName="Microsoft .NET Framework" d:Source="Manual" Version="4.5" />
+  </Dependencies>
+  <Assets>
+    <Asset Type="DebuggerEngineExtension" Path="PmipMyCallStack.vsdconfig"/>
+  </Assets>
+</PackageManifest>
