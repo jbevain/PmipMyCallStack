@@ -9,5 +9,13 @@ As a result, Visual Studio can not show anything meaningful for managed stack fr
 
 PmipMyCallStack is calling the function `mono_pmip` on every frame that doesn't belong to a module to show a meaningful representation of the stack frame and displays it natively in the call stack window.
 
-![preview](https://raw.githubusercontent.com/jbevain/PmipMyCallStack/master/Images/cs.png)
+Incidentally, PmipMyCallStack is an interesting introduction to extending Visual Studio's Concord debugger.
+
+## Before
+
+![Before Pmip My Call Stack](https://raw.githubusercontent.com/jbevain/PmipMyCallStack/master/Images/csb.png)
+
+## After
+
+![After Pmip My Call Stack](https://raw.githubusercontent.com/jbevain/PmipMyCallStack/master/Images/cs.png)
 
