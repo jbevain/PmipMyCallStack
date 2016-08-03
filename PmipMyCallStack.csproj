@@ -4,6 +4,7 @@
     <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <VSSDK140Install Condition="'$(VSSDK140Install)' == ''">$(MSBuildProgramFiles32)\Microsoft Visual Studio 14.0\VSSDK\</VSSDK140Install>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -76,7 +77,7 @@
   <PropertyGroup>
     <VsdConfigOutput>$(OutputPath)\PmipMyCallStack.vsdconfig</VsdConfigOutput>
   </PropertyGroup>
-  <Target Name="IncludeVsdConfig" BeforeTargets="AssignTargetPaths;GetVSIXSourceItems" Condition="$(VSTarget) != '10.0'">
+  <Target Name="IncludeVsdConfig" BeforeTargets="GetVSIXSourceItems" Condition="$(VSTarget) != '10.0'">
     <ItemGroup>
       <Content Include="$(VsdConfigOutput)">
         <IncludeInVSIX>true</IncludeInVSIX>
