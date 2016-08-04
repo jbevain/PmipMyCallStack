@@ -61,17 +61,13 @@ namespace PmipMyCallStack
 
 			foreach (var module in this._frame.RuntimeInstance.GetModuleInstances())
 			{
-				if (module is DkmNativeModuleInstance)
-				{
-					DkmNativeInstructionAddress address = ((DkmNativeModuleInstance) module).FindExportName("mono_pmip", true);
-					if (address != null)
-					{
-						PmipFunctionDataItem item = new PmipFunctionDataItem { PmipFunction = "0x" + address.CPUInstructionPart.InstructionPointer.ToString("X") };
-						pmipFunction = item;
-						_stackContext.SetDataItem(DkmDataCreationDisposition.CreateAlways, item);
-						return true;
-					}
-				}
+				var address = (module as DkmNativeModuleInstance)?.FindExportName("mono_pmip", IgnoreDataExports: true);
+				if (address == null)
+					continue;
+				var item = new PmipFunctionDataItem { PmipFunction = "0x" + address.CPUInstructionPart.InstructionPointer.ToString("X") };
+				pmipFunction = item;
+				_stackContext.SetDataItem(DkmDataCreationDisposition.CreateAlways, item);
+				return true;
 			}
 
 			return false;
