@@ -2,13 +2,13 @@ using System;
 using Microsoft.VisualStudio.Debugger;
 using Microsoft.VisualStudio.Debugger.CallStack;
 using Microsoft.VisualStudio.Debugger.Evaluation;
+using Microsoft.VisualStudio.Debugger.Native;
 
 namespace PmipMyCallStack
 {
 	class PmipRunner
 	{
 		private static readonly DkmLanguage CppLanguage = DkmLanguage.Create("C++", new DkmCompilerId(DkmVendorId.Microsoft, DkmLanguageId.Cpp));
-		private static readonly string[] Modules = { "mono", "monosgen-2.0" };
 
 		private readonly DkmStackContext _stackContext;
 		private readonly DkmStackWalkFrame _frame;
@@ -59,14 +59,12 @@ namespace PmipMyCallStack
 			if (pmipFunction != null)
 				return true;
 
-			foreach (var module in Modules)
+			foreach (var module in this._frame.RuntimeInstance.GetModuleInstances())
 			{
-				var definition = $"{{,,{module}}}mono_pmip";
-
-				PmipFunctionDataItem item = null;
-				if (!EvaluateExpression(definition, r => item = new PmipFunctionDataItem {PmipFunction = definition}))
+				var address = (module as DkmNativeModuleInstance)?.FindExportName("mono_pmip", IgnoreDataExports: true);
+				if (address == null)
 					continue;
-
+				var item = new PmipFunctionDataItem { PmipFunction = "0x" + address.CPUInstructionPart.InstructionPointer.ToString("X") };
 				pmipFunction = item;
 				_stackContext.SetDataItem(DkmDataCreationDisposition.CreateAlways, item);
 				return true;
