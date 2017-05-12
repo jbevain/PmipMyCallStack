@@ -36,7 +36,7 @@ namespace PmipMyCallStack
 			var eval = EvaluateExpression(call, r =>
 			{
 				isNull = r.Address.InstructionAddress.CPUInstructionPart.InstructionPointer == 0;
-				result = r.Value;
+				result = r.Value?.Split('"')[1];
 			});
 
 			if (!eval || isNull)
@@ -53,24 +53,37 @@ namespace PmipMyCallStack
 				_frame.Annotations);
 		}
 
+		private DkmNativeInstructionAddress FindInstructionAddress(string functionName)
+		{
+			foreach (var module in this._frame.RuntimeInstance.GetModuleInstances())
+			{
+				var address = (module as DkmNativeModuleInstance)?.FindExportName(functionName,
+					IgnoreDataExports: true);
+				if(address != null)
+					return address;
+			}
+			return null;
+		}
+
 		private bool TryGetPmipFunction(out PmipFunctionDataItem pmipFunction)
 		{
 			pmipFunction = _stackContext.GetDataItem<PmipFunctionDataItem>();
 			if (pmipFunction != null)
 				return true;
 
-			foreach (var module in this._frame.RuntimeInstance.GetModuleInstances())
-			{
-				var address = (module as DkmNativeModuleInstance)?.FindExportName("mono_pmip", IgnoreDataExports: true);
-				if (address == null)
-					continue;
-				var item = new PmipFunctionDataItem { PmipFunction = "0x" + address.CPUInstructionPart.InstructionPointer.ToString("X") };
-				pmipFunction = item;
-				_stackContext.SetDataItem(DkmDataCreationDisposition.CreateAlways, item);
-				return true;
-			}
+			var pmipOrig = FindInstructionAddress("mono_pmip");
+			var pmipPretty = FindInstructionAddress("mono_pmip_pretty");
 
-			return false;
+			var pmipFnToUse = pmipPretty ?? pmipOrig;
+
+			if (pmipFnToUse == null)
+				return false;
+
+			var item = new PmipFunctionDataItem { PmipFunction = "0x" + pmipFnToUse.CPUInstructionPart.InstructionPointer.ToString("X") };
+			pmipFunction = item;
+			_stackContext.SetDataItem(DkmDataCreationDisposition.CreateAlways, item);
+
+			return true;
 		}
 
 		private static DkmLanguageExpression CppExpression(string expression)
