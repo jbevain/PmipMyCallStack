@@ -30,13 +30,26 @@ namespace PmipMyCallStack
 			var ip = $"0x{_frame.InstructionAddress.CPUInstructionPart.InstructionPointer:X}";
 			var call = $"((char*(*)(void*)){pmipFunction.PmipFunction})((void*){ip})";
 
-			var result = "";
+			var result = "<ERROR>";
 			var isNull = true;
 
 			var eval = EvaluateExpression(call, r =>
 			{
 				isNull = r.Address.InstructionAddress.CPUInstructionPart.InstructionPointer == 0;
-				result = r.Value ?? "<ERROR>";
+				if (r.Value != null)
+				{
+					try
+					{
+						int afterBeginQuote = r.Value.IndexOf("\"", StringComparison.Ordinal) + 1;
+						int beforeEndQuote = r.Value.Length - 1;
+						result = r.Value.Substring(afterBeginQuote, beforeEndQuote - afterBeginQuote);
+					}
+					catch (Exception)
+					{
+					}
+
+				}
+
 			});
 
 			if (!eval || isNull)
