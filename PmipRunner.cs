@@ -36,7 +36,7 @@ namespace PmipMyCallStack
 			var eval = EvaluateExpression(call, r =>
 			{
 				isNull = r.Address.InstructionAddress.CPUInstructionPart.InstructionPointer == 0;
-				result = isNull ? "<ERROR>" : r.Value?.Split('"')[1];
+				result = r.Value ?? "<ERROR>";
 			});
 
 			if (!eval || isNull)
