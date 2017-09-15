@@ -87,16 +87,21 @@ namespace PmipMyCallStack
             return true;
         }
 
-        public static void RefreshStackData(DkmStackWalkFrame frame)
+        public static void RefreshStackData(string fileName)
         {
             try
             {
-                var fileName = "D:\\jon.txt";
+                if (!File.Exists(fileName))
+                {
+                    File.WriteAllText(fileName, string.Empty);
+                    return;
+                }
+
                 var fileInfo = new FileInfo(fileName);
                 if (fileInfo.Length == previousFileLength)
                     return;
 
-                var list = new List<Range>(IPs?.Length * 2 ?? 1000);
+                var list = new List<Range>(1000);
                 using (var inStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 using (var file = new StreamReader(inStream))
                 {
@@ -134,7 +139,8 @@ namespace PmipMyCallStack
 
         public static DkmStackWalkFrame PmipStackFrame(DkmStackContext stackContext, DkmStackWalkFrame frame)
         {
-            RefreshStackData(frame);
+            var fileName = Path.Combine(Path.GetTempPath(), "pmip." + frame.Process.LivePart.Id);
+            RefreshStackData(fileName);
             string name = null;
             if (TryGetDescriptionForIP(frame.InstructionAddress.CPUInstructionPart.InstructionPointer, out name))
                 return DkmStackWalkFrame.Create(
