@@ -61,6 +61,7 @@
     <Compile Include="PmipCallStackFilter.cs" />
     <Compile Include="PmipFunctionDataItem.cs" />
     <Compile Include="PmipRunner.cs" />
+    <Compile Include="PmipUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
