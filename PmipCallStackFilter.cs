@@ -9,9 +9,9 @@ namespace PmipMyCallStack
 {
     public class PmipCallStackFilter : IDkmCallStackFilter
     {
-        private static Range[] IPs;
-        private static long previousFileLength;
-        static FuzzyRangeComparer comparer = new FuzzyRangeComparer();
+        private static Range[] _rangesSortedByIp;
+        private static long _previousFileLength;
+        private static FuzzyRangeComparer _comparer = new FuzzyRangeComparer();
 
         public DkmStackWalkFrame[] FilterNextFrame(DkmStackContext stackContext, DkmStackWalkFrame input)
         {
@@ -30,119 +30,13 @@ namespace PmipMyCallStack
 
             return new[] { PmipStackFrame(stackContext, input) };
         }
-        struct Range
-        {
-            public ulong Start;
-            public ulong End;
-            public string Name;
-        }
-
-        class FuzzyRangeComparer : IComparer<Range>
-        {
-            public int Compare(Range x, Range y)
-            {
-                if (x.Name == null && y.Start <= x.Start && y.End >= x.Start)
-                {
-                    return 0;
-                }
-
-                if (y.Name == null && x.Start <= y.Start && x.End >= y.Start)
-                {
-                    return 0;
-                }
-
-                return x.Start.CompareTo(y.Start);
-            }
-        }
-
-        public static bool TryGetDescriptionForIP(ulong ip, out string name)
-        {
-            name = string.Empty;
-            if (IPs == null)
-                return false;
-            int index = Array.BinarySearch(IPs, new Range() {Start = ip}, comparer);
-            int linearIndex = -1;
-            for (var i =0; i < IPs.Length; i++)
-            {
-                var item = IPs[i];
-                if (ip > item.Start && ip < item.End)
-                {
-                    linearIndex = i;
-                    break;
-                }
-            }
-
-
-            if (linearIndex == -1)
-            {
-                if (index >= 0)
-                    GC.KeepAlive(name);
-                return false;
-            }
-
-            if (linearIndex != index)
-                GC.KeepAlive(name);
-
-            name = IPs[linearIndex].Name;
-            return true;
-        }
-
-        public static void RefreshStackData(string fileName)
-        {
-            try
-            {
-                if (!File.Exists(fileName))
-                {
-                    File.WriteAllText(fileName, string.Empty);
-                    return;
-                }
-
-                var fileInfo = new FileInfo(fileName);
-                if (fileInfo.Length == previousFileLength)
-                    return;
-
-                var list = new List<Range>(1000);
-                using (var inStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                using (var file = new StreamReader(inStream))
-                {
-                    string line;
-                    while ((line = file.ReadLine()) != null)
-                    {
-                        const char delemiter = ';';
-                        string[] tokens = line.Split(delemiter);
-
-                        //should never happen, but lets be safe and not get array out of bounds if it does
-                        if (tokens.Length != 3)
-                            continue;
-
-                        string startip = tokens[0];
-                        string endip = tokens[1];
-                        string description = tokens[2];
-
-                        var startipint = ulong.Parse(startip, NumberStyles.HexNumber);
-                        var endipint = ulong.Parse(endip, NumberStyles.HexNumber);
-
-                        list.Add(new Range() { Name = description, Start = startipint, End = endipint });
-                    }
-                }
-
-                list.Sort((r1, r2) => r1.Start.CompareTo(r2.Start));
-                IPs = list.ToArray();
-                previousFileLength = fileInfo.Length;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Unable to read dumped pmip file: " + ex.Message);
-            }
-
-        }
 
         public static DkmStackWalkFrame PmipStackFrame(DkmStackContext stackContext, DkmStackWalkFrame frame)
         {
             var fileName = Path.Combine(Path.GetTempPath(), "pmip." + frame.Process.LivePart.Id);
             RefreshStackData(fileName);
             string name = null;
-            if (TryGetDescriptionForIP(frame.InstructionAddress.CPUInstructionPart.InstructionPointer, out name))
+            if (TryGetDescriptionForIp(frame.InstructionAddress.CPUInstructionPart.InstructionPointer, out name))
                 return DkmStackWalkFrame.Create(
                     stackContext.Thread,
                     frame.InstructionAddress,
@@ -154,6 +48,73 @@ namespace PmipMyCallStack
                     frame.Annotations);
 
             return frame;
+        }
+
+        public static void RefreshStackData(string fileName)
+        {
+            try
+            {
+                if (!File.Exists(fileName))
+                    return;
+
+                var fileInfo = new FileInfo(fileName);
+                if (fileInfo.Length == _previousFileLength)
+                    return;
+
+                var list = new List<Range>(10000);
+                using (var inStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    using (var file = new StreamReader(inStream))
+                    {
+                        string line;
+                        while ((line = file.ReadLine()) != null)
+                        {
+                            const char delemiter = ';';
+                            var tokens = line.Split(delemiter);
+
+                            //should never happen, but lets be safe and not get array out of bounds if it does
+                            if (tokens.Length != 3)
+                                continue;
+
+                            var startip = tokens[0];
+                            var endip = tokens[1];
+                            var description = tokens[2];
+
+                            var startiplong = ulong.Parse(startip, NumberStyles.HexNumber);
+                            var endipint = ulong.Parse(endip, NumberStyles.HexNumber);
+
+                            list.Add(new Range() { Name = description, Start = startiplong, End = endipint });
+                        }
+                    }
+                }
+
+                list.Sort((r1, r2) => r1.Start.CompareTo(r2.Start));
+                _rangesSortedByIp = list.ToArray();
+                _previousFileLength = fileInfo.Length;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Unable to read dumped pmip file: " + ex.Message);
+            }
+
+        }
+
+        public static bool TryGetDescriptionForIp(ulong ip, out string name)
+        {
+            name = string.Empty;
+
+            if (_rangesSortedByIp == null)
+                return false;
+
+            var rangeToFindIp = new Range() { Start = ip };
+            var index = Array.BinarySearch(_rangesSortedByIp, rangeToFindIp, _comparer);
+
+            if (index < 0)
+                return false;
+
+            name = _rangesSortedByIp[index].Name;
+
+            return true;
         }
     }
 }
