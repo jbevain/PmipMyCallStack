@@ -1,4 +1,4 @@
-Pmip My Call Stack
+Unity Mixed Callstack
 =====
 
 UnityMixedCallstack is a Visual Studio 2015 extension to help debug native applications embedding Mono, like Unity.
