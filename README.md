@@ -17,9 +17,9 @@ In this version we also display the module the managed code belongs to. This giv
 
 ## Before
 
-![Before Unity Mixed Callstack](https://raw.githubusercontent.com/mderoy/PmipMyCallStack/master/Images/csb.png)
+![Before Unity Mixed Callstack](https://raw.githubusercontent.com/mderoy/UnityMixedCallstack/master/Images/csb.png)
 
 ## After
 
-![After Unity Mixed Callstack](https://raw.githubusercontent.com/mderoy/PmipMyCallStack/master/Images/cs.png)
+![After Unity Mixed Callstack](https://raw.githubusercontent.com/mderoy/UnityMixedCallstack/master/Images/cs.png)
 
