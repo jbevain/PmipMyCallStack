@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using Microsoft.VisualStudio;
@@ -10,9 +9,9 @@ using Microsoft.VisualStudio.Debugger.ComponentInterfaces;
 using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.Shell.Interop;
 
-namespace PmipMyCallStack
+namespace UnityMixedCallstack
 {
-    public class PmipCallStackFilter : IDkmCallStackFilter, IDkmLoadCompleteNotification
+    public class UnityMixedCallstackFilter : IDkmCallStackFilter, IDkmLoadCompleteNotification
     {
         private static List<Range> _rangesSortedByIp = new List<Range>();
         private static FuzzyRangeComparer _comparer = new FuzzyRangeComparer();
@@ -54,10 +53,10 @@ namespace PmipMyCallStack
             if (!_enabled) // environment variable not set
                 return new[] { input };
 
-            return new[] { PmipStackFrame(stackContext, input) };
+            return new[] { UnityMixedStackFrame(stackContext, input) };
         }
 
-        private static DkmStackWalkFrame PmipStackFrame(DkmStackContext stackContext, DkmStackWalkFrame frame)
+        private static DkmStackWalkFrame UnityMixedStackFrame(DkmStackContext stackContext, DkmStackWalkFrame frame)
         {
             RefreshStackData(frame.Process.LivePart.Id);
             string name = null;

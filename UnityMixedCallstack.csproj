@@ -14,8 +14,8 @@
     <ProjectGuid>{9A899D87-5BFA-4886-B701-68C515F1371C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PmipMyCallStack</RootNamespace>
-    <AssemblyName>PmipMyCallStack</AssemblyName>
+    <RootNamespace>UnityMixedCallStack</RootNamespace>
+    <AssemblyName>UnityMixedCallStack</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <GeneratePkgDefFile>false</GeneratePkgDefFile>
@@ -61,11 +61,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FuzzyRangeComparer.cs" />
-    <Compile Include="PmipCallStackFilter.cs" />
+    <Compile Include="UnityMixedCallStackFilter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <VsdConfigXmlFiles Include="PmipMyCallStack.vsdconfigxml" />
+    <VsdConfigXmlFiles Include="UnityMixedCallStack.vsdconfigxml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="source.extension.vsixmanifest">
@@ -76,7 +76,7 @@
   <Import Project="$(ConcordSDKDir)Tools\bin\Microsoft.VSDebugger.targets" />
   <Import Project="$(VSToolsPath)\VSSDK\Microsoft.VsSDK.targets" Condition="'$(VSToolsPath)' != ''" />
   <PropertyGroup>
-    <VsdConfigOutput>$(OutputPath)\PmipMyCallStack.vsdconfig</VsdConfigOutput>
+    <VsdConfigOutput>$(OutputPath)\UnityMixedCallStack.vsdconfig</VsdConfigOutput>
   </PropertyGroup>
   <Target Name="IncludeVsdConfig" BeforeTargets="GetVSIXSourceItems" Condition="$(VSTarget) != '10.0'">
     <ItemGroup>

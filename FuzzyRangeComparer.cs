@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PmipMyCallStack
+namespace UnityMixedCallstack
 {
     struct Range
     {

@@ -3,9 +3,9 @@
   <ManagedComponent
     ComponentId="408CB9BB-93B1-44A7-AA4E-88956AB421DB"
     ComponentLevel="9995000"
-    AssemblyName="PmipMyCallStack">
+    AssemblyName="UnityMixedCallstack">
 
-    <Class Name="PmipMyCallStack.PmipCallStackFilter">
+    <Class Name="UnityMixedCallstack.UnityMixedCallstackFilter">
 
       <Implements>
         <InterfaceGroup>
