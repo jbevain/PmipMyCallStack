@@ -23,9 +23,15 @@ namespace UnityMixedCallstack
 
         public void OnLoadComplete(DkmProcess process, DkmWorkList workList, DkmEventDescriptor eventDescriptor)
         {
-            IVsOutputWindow outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
-            Guid debugPaneGuid = VSConstants.GUID_OutWindowDebugPane;
-            outWindow.GetPane(ref debugPaneGuid, out _debugPane);
+            _enabled = true;
+            DisposeStreams();
+
+            if (_debugPane == null)
+            {
+                IVsOutputWindow outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
+                Guid debugPaneGuid = VSConstants.GUID_OutWindowDebugPane;
+                outWindow.GetPane(ref debugPaneGuid, out _debugPane);
+            }
 
             var env = Environment.GetEnvironmentVariable("UNITY_MIXED_CALLSTACK");
             if (env == null || env == "0") // plugin not enabled
@@ -89,7 +95,13 @@ namespace UnityMixedCallstack
         private static void DisposeStreams()
         {
             _fileStreamReader?.Dispose();
+            _fileStreamReader = null;
+
             _fileStream?.Dispose();
+            _fileStream = null;
+
+            _currentFile = null;
+
             _rangesSortedByIp.Clear();
         }
 
@@ -126,9 +138,9 @@ namespace UnityMixedCallstack
                 }
                 catch (Exception ex)
                 {
-                    _currentFile = null;
                     _debugPane.OutputString("Unable to read dumped pmip file: " + ex.Message + "\n");
                     DisposeStreams();
+                    _enabled = false;
                     return;
                 }
             }
@@ -157,6 +169,9 @@ namespace UnityMixedCallstack
             catch (Exception ex)
             {
                 _debugPane.OutputString("Unable to read dumped pmip file: " + ex.Message + "\n");
+                DisposeStreams();
+                _enabled = false;
+                return;
             }
 
             _rangesSortedByIp.Sort((r1, r2) => r1.Start.CompareTo(r2.Start));
