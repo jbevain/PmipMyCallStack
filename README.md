@@ -1,7 +1,7 @@
 Unity Mixed Callstack
 =====
 
-UnityMixedCallstack is a Visual Studio 2015 extension to help debug native applications embedding Mono, like Unity.
+UnityMixedCallstack is a Visual Studio 2015/2017 extension to help debug native applications embedding Mono, like Unity.
 
 Mono doesn't generate debug symbols that Visual Studio understands for jitted functions.
 
