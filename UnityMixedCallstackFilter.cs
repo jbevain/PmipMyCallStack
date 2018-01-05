@@ -11,11 +11,11 @@ using Microsoft.VisualStudio.Shell.Interop;
 
 namespace UnityMixedCallstack
 {
-    public class UnityMixedCallstackFilter : IDkmCallStackFilter, IDkmLoadCompleteNotification
+    public class UnityMixedCallstackFilter : IDkmCallStackFilter, IDkmLoadCompleteNotification, IDkmModuleInstanceLoadNotification
     {
         private static List<Range> _rangesSortedByIp = new List<Range>();
         private static FuzzyRangeComparer _comparer = new FuzzyRangeComparer();
-        private static bool _enabled = true;
+        private static bool _enabled;
         private static IVsOutputWindowPane _debugPane;
         private static string _currentFile;
         private static FileStream _fileStream;
@@ -23,7 +23,6 @@ namespace UnityMixedCallstack
 
         public void OnLoadComplete(DkmProcess process, DkmWorkList workList, DkmEventDescriptor eventDescriptor)
         {
-            _enabled = true;
             DisposeStreams();
 
             if (_debugPane == null)
@@ -31,14 +30,6 @@ namespace UnityMixedCallstack
                 IVsOutputWindow outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
                 Guid debugPaneGuid = VSConstants.GUID_OutWindowDebugPane;
                 outWindow.GetPane(ref debugPaneGuid, out _debugPane);
-            }
-
-            var env = Environment.GetEnvironmentVariable("UNITY_MIXED_CALLSTACK");
-            if (env == null || env == "0") // plugin not enabled
-            {
-                _debugPane.OutputString("Warning: To use the UnityMixedCallstack plugin please set the environment variable UNITY_MIXED_CALLSTACK=1 and relaunch Unity and Visual Studio\n");
-                _debugPane.Activate();
-                _enabled = false;
             }
         }
 
@@ -51,9 +42,6 @@ namespace UnityMixedCallstack
                 return new[] { input };
 
             if (input.InstructionAddress.ModuleInstance != null && input.InstructionAddress.ModuleInstance.Module != null) // code in existing module
-                return new[] { input };
-
-            if (!stackContext.Thread.IsMainThread) // error case
                 return new[] { input };
 
             if (!_enabled) // environment variable not set
@@ -189,6 +177,12 @@ namespace UnityMixedCallstack
 
             name = _rangesSortedByIp[index].Name;
             return true;
+        }
+
+        public void OnModuleInstanceLoad(DkmModuleInstance moduleInstance, DkmWorkList workList, DkmEventDescriptorS eventDescriptor)
+        {
+            if (moduleInstance.Name.Contains("mono-2.0"))
+                _enabled = true;
         }
     }
 }
