@@ -15,6 +15,8 @@ The original PmipMyCallstack plugin created by JB Evain would call the function 
 
 In this version we also display the module the managed code belongs to. This gives you a nice callstack to look at in visual studio.
 
+Remember, you need to disable Just My Code in the debugger options (Debug -> Options...) to expand the `[External Code]` entry in the callstack.
+
 ## Before
 
 ![Before Unity Mixed Callstack](https://raw.githubusercontent.com/mderoy/UnityMixedCallstack/master/Images/csb.png)
