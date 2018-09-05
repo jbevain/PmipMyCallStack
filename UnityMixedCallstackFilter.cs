@@ -29,7 +29,7 @@ namespace UnityMixedCallstack
             {
                 IVsOutputWindow outWindow = Package.GetGlobalService(typeof(SVsOutputWindow)) as IVsOutputWindow;
                 Guid debugPaneGuid = VSConstants.GUID_OutWindowDebugPane;
-                outWindow.GetPane(ref debugPaneGuid, out _debugPane);
+                outWindow?.GetPane(ref debugPaneGuid, out _debugPane);
             }
         }
 
@@ -126,7 +126,7 @@ namespace UnityMixedCallstack
                 }
                 catch (Exception ex)
                 {
-                    _debugPane.OutputString("Unable to read dumped pmip file: " + ex.Message + "\n");
+                    _debugPane?.OutputString("Unable to read dumped pmip file: " + ex.Message + "\n");
                     DisposeStreams();
                     _enabled = false;
                     return;
@@ -156,7 +156,7 @@ namespace UnityMixedCallstack
             }
             catch (Exception ex)
             {
-                _debugPane.OutputString("Unable to read dumped pmip file: " + ex.Message + "\n");
+                _debugPane?.OutputString("Unable to read dumped pmip file: " + ex.Message + "\n");
                 DisposeStreams();
                 _enabled = false;
                 return;
