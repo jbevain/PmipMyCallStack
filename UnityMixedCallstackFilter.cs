@@ -181,7 +181,7 @@ namespace UnityMixedCallstack
 
         public void OnModuleInstanceLoad(DkmModuleInstance moduleInstance, DkmWorkList workList, DkmEventDescriptorS eventDescriptor)
         {
-            if (moduleInstance.Name.Contains("mono-2.0"))
+            if (moduleInstance.Name.Contains("mono-2.0") && moduleInstance.MinidumpInfoPart == null)
                 _enabled = true;
         }
     }
